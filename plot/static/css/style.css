@@ -1,0 +1,19 @@
+body {
+    background: #cccccc;
+}
+.color-red{
+    background: #f00;
+}
+.color-blue{
+    background: #00f;
+}
+.full-width{
+    width: 100%;
+}
+.input-group-addon{
+    padding: 0px;
+    width: 75px;
+}
+label{
+    font-weight: normal;
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wireless Sensors</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+    <div class="container">
+        <form method="POST" action="/plot">
+            {% csrf_token %}
+            <select name="topology">
+                <option value="square">Unit Square</option>
+                <option value="circle">Unit Circle</option>
+                <option value="sphere" disabled>Unit Sphere</option>
+            </select>
+
+            <input type="text" name="nodes" placeholder="Number of nodes">
+            <input type="text" name="avg_deg" placeholder="Avg. Deg.">
+
+            <button type="submit">Plot Graph</button>
+        </form>
+    </div>
+</body>
+</html>
+
