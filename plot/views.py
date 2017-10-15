@@ -1,6 +1,8 @@
 # author: Prabhat Kumar Pal
 # SMU Id: 47499768
+from collections import Counter
 
+import xlwt as xlwt
 from django.shortcuts import render
 
 import operator
@@ -10,7 +12,20 @@ import numpy as np
 import json
 
 
-def calculate_distance(item, comp, degree, mapped_list, number_of_edges, point_map, radius):
+def generate_csv(degree):
+    variable = Counter(degree.values())
+    book = xlwt.Workbook()
+    sheet1 = book.add_sheet("Sheet1")
+    i = 0
+    for var in variable.iteritems():
+        sheet1.write(i, 0, var[0])
+        sheet1.write(i, 1, var[1])
+
+        i += 1
+    book.save("degree.xls")
+
+
+def calculate_distance(item, comp, mapped_list, number_of_edges, point_map, radius):
     for i in item:
         for j in comp:
             if list(i) != list(j):
@@ -21,25 +36,32 @@ def calculate_distance(item, comp, degree, mapped_list, number_of_edges, point_m
                     number_of_edges['0'] += 1
                     mapped_list.setdefault(str(point_map[str(i)]), [i]).append(point_map[str(j)])
                     mapped_list.setdefault(str(point_map[str(j)]), [j]).append(point_map[str(i)])
-                    degree[str(i)] = degree.get(str(i), 0) + 1
-                    degree[str(j)] = degree.get(str(j), 0) + 1
+                    # degree[str(i)] = degree.get(str(i), 0) + 1
+                    # degree[str(j)] = degree.get(str(j), 0) + 1
             else:
                 mapped_list[str(point_map[str(i)])] = mapped_list.setdefault(str(point_map[str(i)]), [i])
-        degree[str(i)] = degree.setdefault(str(i), 0)
+        # degree[str(i)] = degree.setdefault(str(i), 0)
         mapped_list[str(point_map[str(i)])] = mapped_list.setdefault(str(point_map[str(i)]), [i])
 
-    return number_of_edges, mapped_list, degree
+    return number_of_edges, mapped_list
 
 
-def get_max_and_min_degree(degree, nodes):
+def get_max_and_min_degree(mapped_list, nodes):
+    degree = {str(lst[0]): len(lst)-1 for lst in mapped_list.values()}
     total_degree = sum(degree.values())
+
     avg_deg_received = float(total_degree) / nodes
 
     max_deg = max(degree.iteritems(), key=operator.itemgetter(1))[1]
     min_deg = min(degree.iteritems(), key=operator.itemgetter(1))[1]
 
-    max_vertex = max(degree.iteritems(), key=operator.itemgetter(1))[0]
-    min_vertex = min(degree.iteritems(), key=operator.itemgetter(1))[0]
+    max_vertex = [k for k, v in degree.items() if v == max_deg]
+    min_vertex = [k for k, v in degree.items() if v == min_deg]
+
+    for i in range(0, len(max_vertex)):
+        max_vertex[i] = [float(max_vertex[i].replace('[', '').replace(']', '').split(', ')[0]), float(max_vertex[i].replace('[', '').replace(']', '').split(', ')[1])]
+    for i in range(0, len(min_vertex)):
+        min_vertex[i] = [float(min_vertex[i].replace('[', '').replace(']', '').split(', ')[0]), float(min_vertex[i].replace('[', '').replace(']', '').split(', ')[1])]
 
     return min_deg, max_deg, avg_deg_received, max_vertex, min_vertex
 
@@ -71,36 +93,37 @@ def get_point_map(xy, radius, scale):
 
 
 def cell_traverse(no_of_col, cells, point_map, radius):
-    degree = {}
+    # degree = {}
     mapped_list = {}
     number_of_edges = {'0': 0}
     for k in range(0, int(no_of_col ** 2)):
         if str(k) in cells:
             items = cells[str(k)]
-            number_of_edges, mapped_list, degree = calculate_distance(items, items, degree, mapped_list,
-                                                                      number_of_edges, point_map, radius)
-
-            if str(k + int(no_of_col)) in cells and 0 < k + int(no_of_col) < int(no_of_col ** 2):
-                bottom = cells[str(k + int(no_of_col))]
-                number_of_edges, mapped_list, degree = calculate_distance(items, bottom, degree, mapped_list,
-                                                                          number_of_edges, point_map, radius)
-
-            if str(k + int(no_of_col) - 1) in cells and k % int(no_of_col) != 0:
-                bottom_left = cells[str(k + int(no_of_col) - 1)]
-                number_of_edges, mapped_list, degree = calculate_distance(items, bottom_left, degree, mapped_list,
-                                                                          number_of_edges, point_map, radius)
+            number_of_edges, mapped_list = calculate_distance(items, items, mapped_list, number_of_edges, point_map,
+                                                              radius)
 
             if str(k + 1) in cells and (k + 1) % int(no_of_col) != 0:
                 right = cells[str(k + 1)]
-                number_of_edges, mapped_list, degree = calculate_distance(items, right, degree, mapped_list,
-                                                                          number_of_edges, point_map, radius)
+                number_of_edges, mapped_list = calculate_distance(items, right, mapped_list, number_of_edges, point_map,
+                                                                  radius)
 
-            if str(k + int(no_of_col) + 1) in cells and 0 < k + int(no_of_col) + 1 < int(no_of_col ** 2):
-                bottom_right = cells[str(k + int(no_of_col) + 1)]
-                number_of_edges, mapped_list, degree = calculate_distance(items, bottom_right, degree, mapped_list,
-                                                                          number_of_edges, point_map, radius)
+            if 0 < k + int(no_of_col) < int(no_of_col ** 2):
+                if str(k + int(no_of_col)) in cells:
+                    bottom = cells[str(k + int(no_of_col))]
+                    number_of_edges, mapped_list = calculate_distance(items, bottom, mapped_list, number_of_edges,
+                                                                      point_map, radius)
 
-    return number_of_edges, mapped_list, degree
+                if str(k + int(no_of_col) - 1) in cells and k % int(no_of_col) != 0:
+                    bottom_left = cells[str(k + int(no_of_col) - 1)]
+                    number_of_edges, mapped_list = calculate_distance(items, bottom_left, mapped_list, number_of_edges,
+                                                                      point_map, radius)
+
+                if str(k + int(no_of_col) + 1) in cells and 0 < k + int(no_of_col) + 1 < int(no_of_col ** 2):
+                    bottom_right = cells[str(k + int(no_of_col) + 1)]
+                    number_of_edges, mapped_list = calculate_distance(items, bottom_right, mapped_list, number_of_edges,
+                                                                      point_map, radius)
+
+    return number_of_edges, mapped_list
 
 
 def square_topology(request, nodes, avg_deg):
@@ -117,12 +140,11 @@ def square_topology(request, nodes, avg_deg):
 
     point_map, no_of_col, cells = get_point_map(xy, radius, 1)
 
-    number_of_edges, mapped_list, degree = cell_traverse(no_of_col, cells, point_map, radius)
+    number_of_edges, mapped_list = cell_traverse(no_of_col, cells, point_map, radius)
 
-    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(degree, nodes)
+    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes)
 
-    max_vertex = mapped_list[str(point_map[str(max_vertex)])][0]
-    min_vertex = mapped_list[str(point_map[str(min_vertex)])][0]
+    # generate_csv(degree)
 
     return {'mapped_list': json.dumps(mapped_list), 'avg_deg_received': avg_deg_received, 'max_deg': max_deg,
             'min_deg': min_deg, 'number_of_edges': number_of_edges['0'], 'max_vertex': max_vertex,
@@ -145,12 +167,9 @@ def circle_topology(request, nodes, avg_deg):
 
     point_map, no_of_col, cells = get_point_map(xy, radius, 2)
 
-    number_of_edges, mapped_list, degree = cell_traverse(no_of_col, cells, point_map, radius)
+    number_of_edges, mapped_list = cell_traverse(no_of_col, cells, point_map, radius)
 
-    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(degree, nodes)
-
-    max_vertex = mapped_list[str(point_map[str(max_vertex)])][0]
-    min_vertex = mapped_list[str(point_map[str(min_vertex)])][0]
+    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes)
 
     return {'mapped_list': json.dumps(mapped_list), 'avg_deg_received': avg_deg_received, 'max_deg': max_deg,
             'min_deg': min_deg, 'number_of_edges': number_of_edges['0'], 'max_vertex': max_vertex,
@@ -162,15 +181,19 @@ def plot_graph(request):
     nodes = 0
     avg_deg = 0
     returned_details = {}
-    plot_option = 1
+    plot_option = [-1, -1]
     radius_estimated = 0
 
     if request.method == "POST":
         topology = request.POST["topology"]
         nodes = request.POST["nodes"]
         avg_deg = request.POST["avg_deg"]
-        plot_option = request.POST["plot-option"]
-        radius_estimated = request.POST["radius-estimated"]
+        temp_plot_option = request.POST.getlist("plot-option[]")
+        for i in range(0, len(temp_plot_option)):
+            if int(temp_plot_option[i]) == 0:
+                plot_option[0] = 0
+            if int(temp_plot_option[i]) == 1:
+                plot_option[1] = 1
 
     start = timeit.default_timer()
 
@@ -181,7 +204,7 @@ def plot_graph(request):
             returned_details = square_topology(request, int(nodes), float(avg_deg))
 
     returned_details["topology"] = str(topology)
-    returned_details["plot_option"] = int(plot_option)
+    returned_details["plot_option"] = plot_option
     returned_details["avg_deg"] = avg_deg
     returned_details["nodes"] = nodes
     returned_details["topology"] = topology

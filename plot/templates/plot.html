@@ -11,7 +11,9 @@
     <div class="container">
         <div class="row">
             <div class="col-md-7">
-                <div id='myContainer'></div>
+                <div id='myContainer1'></div>
+                <div id='myContainer2'></div>
+                <div id='myContainer3' style="display: none;"></div>
             </div>
             <div class="col-md-5">
                 <div class="col-md-6">
@@ -32,10 +34,10 @@
                             <div><label><strong>No. of Edges:</strong> {{ number_of_edges }}</label></div>
                         </li>
                         <li class="list-group-item">
-                            <div><label><snap class="color-red">&nbsp;&nbsp;&nbsp;&nbsp;</snap> Max degree</label></div>
+                            <div><label><span class="color-red">&nbsp;&nbsp;&nbsp;&nbsp;</span> Max degree</label></div>
                         </li>
                         <li class="list-group-item">
-                            <div><label><snap class="color-blue">&nbsp;&nbsp;&nbsp;&nbsp;</snap> Min degree</label></div>
+                            <div><label><span class="color-blue">&nbsp;&nbsp;&nbsp;&nbsp;</span> Min degree</label></div>
                         </li>
                     </ul>
                 </div>
@@ -43,10 +45,10 @@
                     <form method="POST" action="/plot">
                         {% csrf_token %}
                         <div class="input-group full-width">
-                            <label class="form-control"><input type="radio" id="withEdgeRadio" name="plot-option" value="1" checked  >&nbsp;&nbsp;With Edges</label>
+                            <label class="form-control"><input type="checkbox" id="showEdgeCheck" name="plot-option[]" value="0" checked onchange="drawEdge()">&nbsp;&nbsp;Show Edges</label>
                         </div>
                         <div class="input-group full-width">
-                            <label class="form-control"><input type="radio" id="withoutEdgeRadio" name="plot-option" value="0">&nbsp;&nbsp;Without Edges</label>
+                            <label class="form-control"><input type="checkbox" id="minMaxCheck" name="plot-option[]" value="1" onchange="drawMinMax()">&nbsp;&nbsp;Show Min-Max Deg.</label>
                         </div>
                         <div class="input-group full-width">
                              <span class="input-group-addon">Topology</span>
@@ -65,10 +67,6 @@
                             <input type="text" name="avg_deg" class="form-control" placeholder="Avg. Deg." value="{{ avg_deg }}">
                         </div>
                         <div class="input-group full-width">
-                            <span class="input-group-addon">Radius</span>
-                            <input type="text" name="radius-estimated" class="form-control" placeholder="Estimated Radius" value="{{ radius_estimated }}">
-                        </div>
-                        <div class="input-group full-width">
                             <button type="submit" class="btn btn-info btn-block">Plot Graph</button>
                         </div>
                     </form>
@@ -80,86 +78,144 @@
 	<script type="text/javascript" src="{% static 'js/jquery-1.11.1.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/p5.min.js' %}"></script>
 	<script>
-        function setup() {
-            var myCanvas = createCanvas(600, 600);
-            myCanvas.parent('myContainer');
-            background(0);
+        var point_size = 5;
+        var max_ver = [];
+        var min_ver = [];
+        var max_vertex = {{ max_vertex }};
+        var min_vertex = {{ min_vertex }};
+        var plot_option = {{ plot_option }};
+        var topology = "{{ topology }}";
+        var json = JSON.parse('{{ mapped_list|safe }}');
+        var offset = 600;
+        {% if topology == "circle" %}
+            offset = 300;
+        {% endif  %}
 
-            var offset = 600;
-            {% if topology == "circle" %}
-                offset = 300;
-            {% endif  %}
+        if (plot_option[0] === 0){
+            document.getElementById("showEdgeCheck").checked = true;
+            $("#myContainer2").css("display", "block");
+        }
+        else{
+            document.getElementById("showEdgeCheck").checked = false;
+            $("#myContainer2").css("display", "none");
+        }
 
-            var max_ver = [];
-            var min_ver = [];
-            var max_vertex = {{ max_vertex }};
-            var min_vertex = {{ min_vertex }};
-            var point_size = 5;
-            var plot_edges = {{ plot_option }};
-            var topology = "{{ topology }}";
+        if (plot_option[1] === 1){
+            document.getElementById("minMaxCheck").checked = true;
+            $("#myContainer3").css("display", "block");
+        }
+        else{
+            document.getElementById("minMaxCheck").checked = false;
+            $("#myContainer3").css("display", "none");
+        }
 
-            if (plot_edges === 0){
-                plot_edges = false;
-                document.getElementById("withEdgeRadio").checked = false;
-                document.getElementById("withoutEdgeRadio").checked = true;
+        document.getElementById("topology").value = topology;
+
+        function drawEdge() {
+            if (document.getElementById("showEdgeCheck").checked) {
+                $("#myContainer2").css("display", "block");
             }
-            else{
-                plot_edges = true;
-                document.getElementById("withEdgeRadio").checked = true;
-                document.getElementById("withoutEdgeRadio").checked = false;
-            }
-            document.getElementById("topology").value = topology;
-            if(topology === "circle"){
-                background(180);
-                fill(0)
-                ellipse(width/2, width/2, height, height);
-            }
-
-            var json = JSON.parse('{{ mapped_list|safe }}');
-            for (var key in json) {
-                if (json.hasOwnProperty(key)) {
-                    var val = json[key];
-
-                    fill(255, 200, 0);
-                    stroke(255, 255, 255, 75);
-                    strokeWeight(0.5);
-
-                    if (plot_edges === true){
-                        for (var i = 1; i < val.length; i++) {
-                            var v = val[i];
-                            line((val[0])[0] * offset, (val[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
-                        }
-
-                        if (val[0][0] === max_vertex[0] && val[0][1] === max_vertex[1]) {
-                            max_ver = val;
-                            fill(255, 0, 0, 255);
-                        }
-                        if (val[0][0] === min_vertex[0] && val[0][1] === min_vertex[1]) {
-                            min_ver = val;
-                            fill(0, 0, 255, 255);
-                        }
-                    }
-
-                    noStroke();
-                    ellipse((val[0])[0] * offset, (val[0])[1] * offset, point_size, point_size);
-                }
-            }
-
-            if (plot_edges === true) {
-                for (var i = 1; i < max_ver.length; i++) {
-                    var v = max_ver[i];
-                    stroke(255, 0, 0);
-                    strokeWeight(1);
-                    line((max_ver[0])[0] * offset, (max_ver[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
-                }
-                for (var i = 1; i < min_ver.length; i++) {
-                    var v = min_ver[i];
-                    stroke(0, 0, 255);
-                    strokeWeight(1);
-                    line((min_ver[0])[0] * offset, (min_ver[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
-                }
+            else {
+                $("#myContainer2").css("display", "none");
             }
         }
+
+        function drawMinMax() {
+            if (document.getElementById("minMaxCheck").checked){
+                $("#myContainer3").css("display", "block");
+            }
+            else {
+                $("#myContainer3").css("display", "none");
+            }
+        }
+
+        var c_back = function( p ) {
+            p.setup = function() {
+                p.createCanvas(600, 600);
+                p.background(0);
+
+                if(topology === "circle"){
+                    p.background(180);
+                    p.fill(0);
+                    p.ellipse(p.width/2, p.width/2, p.height, p.height);
+                }
+
+                for (var key in json) {
+                    if (json.hasOwnProperty(key)) {
+                        var val = json[key];
+
+                        p.fill(255, 200, 0);
+                        p.noStroke();
+                        p.ellipse((val[0])[0] * offset, (val[0])[1] * offset, point_size, point_size);
+
+                        for (var i = 0; i < max_vertex.length; i++){
+                            if (val[0][0] === max_vertex[i][0] && val[0][1] === max_vertex[i][1]){
+                                max_ver.push(val);
+                            }
+                        }
+
+                        for (var i = 0; i < min_vertex.length; i++){
+                            if (val[0][0] === min_vertex[i][0] && val[0][1] === min_vertex[i][1]){
+                                min_ver.push(val);
+                            }
+                        }
+                    }
+                }
+            };
+        };
+        var canvasBackground = new p5(c_back, 'myContainer1');
+
+        var c_edges = function( p ) {
+            p.setup = function() {
+                p.createCanvas(600, 600);
+                p.background(0, 0, 0, 0);
+
+                for (var key in json) {
+                    if (json.hasOwnProperty(key)) {
+                        var val = json[key];
+
+                        p.stroke(255, 255, 255, 75);
+                        p.strokeWeight(0.5);
+
+                        for (var i = 1; i < val.length; i++) {
+                            var v = val[i];
+                            p.line((val[0])[0] * offset, (val[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
+                        }
+                    }
+                }
+            };
+        };
+        var canvasEdges = new p5(c_edges, 'myContainer2');
+
+        var c_min_max = function( p ) {
+            p.setup = function() {
+                p.createCanvas(600, 600);
+                p.background(0,0,0,0);
+
+                max_ver.forEach(function(element){
+                    for (var i = 1; i < element.length; i++) {
+                        var v = element[i];
+                        p.fill(255, 0, 0, 255);
+                        p.stroke(255, 0, 0);
+                        p.strokeWeight(1);
+                        p.line((element[0])[0] * offset, (element[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
+                        p.ellipse((element[0])[0] * offset, (element[0])[1] * offset, point_size, point_size);
+                    }
+                });
+
+                min_ver.forEach(function(element) {
+                    for (var i = 1; i < element.length; i++) {
+                        var v = element[i];
+                        p.fill(0, 0, 255, 255);
+                        p.stroke(0, 0, 255);
+                        p.strokeWeight(1);
+                        p.line((element[0])[0] * offset, (element[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
+                        p.ellipse((element[0])[0] * offset, (element[0])[1] * offset, point_size, point_size);
+                    }
+                });
+            };
+        };
+        var canvasMinMax = new p5(c_min_max, 'myContainer3');
 	</script>
 </body>
 </html>
