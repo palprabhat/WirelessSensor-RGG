@@ -1,28 +1,11 @@
 # author: Prabhat Kumar Pal
 # SMU Id: 47499768
-from collections import Counter
-
-import xlwt as xlwt
 from django.shortcuts import render
 
 import operator
 import timeit
-
 import numpy as np
 import json
-
-
-def generate_csv(degree):
-    variable = Counter(degree.values())
-    book = xlwt.Workbook()
-    sheet1 = book.add_sheet("Sheet1")
-    i = 0
-    for var in variable.iteritems():
-        sheet1.write(i, 0, var[0])
-        sheet1.write(i, 1, var[1])
-
-        i += 1
-    book.save("degree.xls")
 
 
 def calculate_distance(item, comp, mapped_list, number_of_edges, point_map, radius):
@@ -36,17 +19,14 @@ def calculate_distance(item, comp, mapped_list, number_of_edges, point_map, radi
                     number_of_edges['0'] += 1
                     mapped_list.setdefault(str(point_map[str(i)]), [i]).append(point_map[str(j)])
                     mapped_list.setdefault(str(point_map[str(j)]), [j]).append(point_map[str(i)])
-                    # degree[str(i)] = degree.get(str(i), 0) + 1
-                    # degree[str(j)] = degree.get(str(j), 0) + 1
             else:
                 mapped_list[str(point_map[str(i)])] = mapped_list.setdefault(str(point_map[str(i)]), [i])
-        # degree[str(i)] = degree.setdefault(str(i), 0)
         mapped_list[str(point_map[str(i)])] = mapped_list.setdefault(str(point_map[str(i)]), [i])
 
     return number_of_edges, mapped_list
 
 
-def get_max_and_min_degree(mapped_list, nodes):
+def get_max_and_min_degree(mapped_list, nodes, deg):
     degree = {str(lst[0]): len(lst)-1 for lst in mapped_list.values()}
     total_degree = sum(degree.values())
 
@@ -93,7 +73,6 @@ def get_point_map(xy, radius, scale):
 
 
 def cell_traverse(no_of_col, cells, point_map, radius):
-    # degree = {}
     mapped_list = {}
     number_of_edges = {'0': 0}
     for k in range(0, int(no_of_col ** 2)):
@@ -133,8 +112,9 @@ def square_topology(request, nodes, avg_deg):
     y = np.random.random(nodes)
 
     xy = []
+
     for i in range(0, len(x)):
-        xy.append([x[i], y[i]])
+        xy.append([float(format(x[i], '.8f')), float(format(y[i], '.8f'))])
 
     xy = sorted(xy, key=operator.itemgetter(0))
 
@@ -142,13 +122,12 @@ def square_topology(request, nodes, avg_deg):
 
     number_of_edges, mapped_list = cell_traverse(no_of_col, cells, point_map, radius)
 
-    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes)
-
-    # generate_csv(degree)
+    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes, avg_deg)
 
     return {'mapped_list': json.dumps(mapped_list), 'avg_deg_received': avg_deg_received, 'max_deg': max_deg,
             'min_deg': min_deg, 'number_of_edges': number_of_edges['0'], 'max_vertex': max_vertex,
-            'min_vertex': min_vertex, "radius": radius}
+            'min_vertex': min_vertex, "radius": radius, "cells": json.dumps(cells), "point_map": json.dumps(point_map),
+            "cell_count": no_of_col ** 2}
 
 
 def circle_topology(request, nodes, avg_deg):
@@ -161,7 +140,7 @@ def circle_topology(request, nodes, avg_deg):
 
     xy = []
     for i in range(0, len(x)):
-        xy.append([x[i], y[i]])
+        xy.append([float(format(x[i], '.8f')), float(format(y[i], '.8f'))])
 
     xy = sorted(xy, key=operator.itemgetter(0))
 
@@ -169,11 +148,12 @@ def circle_topology(request, nodes, avg_deg):
 
     number_of_edges, mapped_list = cell_traverse(no_of_col, cells, point_map, radius)
 
-    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes)
+    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes, avg_deg)
 
     return {'mapped_list': json.dumps(mapped_list), 'avg_deg_received': avg_deg_received, 'max_deg': max_deg,
             'min_deg': min_deg, 'number_of_edges': number_of_edges['0'], 'max_vertex': max_vertex,
-            'min_vertex': min_vertex, "radius": radius}
+            'min_vertex': min_vertex, "radius": radius, "cells": json.dumps(cells), "point_map": json.dumps(point_map),
+            "cell_count": no_of_col ** 2}
 
 
 def plot_graph(request):
@@ -183,11 +163,14 @@ def plot_graph(request):
     returned_details = {}
     plot_option = [-1, -1]
     radius_estimated = 0
+    animate = True
 
     if request.method == "POST":
         topology = request.POST["topology"]
         nodes = request.POST["nodes"]
         avg_deg = request.POST["avg_deg"]
+        if "animate[]" in request.POST:
+            animate = request.POST["animate[]"]
         temp_plot_option = request.POST.getlist("plot-option[]")
         for i in range(0, len(temp_plot_option)):
             if int(temp_plot_option[i]) == 0:
@@ -209,6 +192,8 @@ def plot_graph(request):
     returned_details["nodes"] = nodes
     returned_details["topology"] = topology
     returned_details["radius_estimated"] = radius_estimated
+    returned_details["animate"] = animate
+
 
     stop = timeit.default_timer()
     print("Time taken: " + str(stop - start))
