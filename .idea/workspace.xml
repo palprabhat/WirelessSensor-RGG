@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="6d36f83f-4a27-4052-a161-ee8c97ba2fd8" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plot/views.py" afterPath="$PROJECT_DIR$/plot/views.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -383,7 +382,14 @@
       <option name="project" value="LOCAL" />
       <updated>1510075073723</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="smallest last order and coloring nodes + bugs fixed from prev push">
+      <created>1510075200220</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1510075200220</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -451,7 +457,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="bugs fixed, performance improved" />
     <MESSAGE value="added animation, bugs fixed, performance improved" />
-    <option name="LAST_COMMIT_MESSAGE" value="added animation, bugs fixed, performance improved" />
+    <MESSAGE value="smallest last order and coloring nodes + bugs fixed from prev push" />
+    <option name="LAST_COMMIT_MESSAGE" value="smallest last order and coloring nodes + bugs fixed from prev push" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
