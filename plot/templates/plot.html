@@ -35,9 +35,6 @@
                         <li class="list-group-item">
                             <div><label><strong>No. of Edges:</strong> {{ number_of_edges }}</label></div>
                         </li>
-                        <li class="list-group-item hidden" id="max-deg-when-deleted">
-                            <div><label><strong>Max Deg. when deleted:</strong> <span></span></label></div>
-                        </li>
                         <li class="list-group-item hidden" id="no-of-colors">
                             <div><label><strong>No. of Colors:</strong> <span></span></label></div>
                         </li>
@@ -175,7 +172,6 @@
                     lastOrder = json["last_order"];
                     colorGraph = JSON.parse(json["color_graph"]);
                     var noOfColor = json["no_of_colors"];
-                    var maxDegWhenDeleted = json["max_deg_when_deleted"];
                     var maxColorSize = json["max_color_size"];
                     var terminalCliqueSize = json["terminal_clique_size"];
 
@@ -183,7 +179,6 @@
                     $("#no-of-colors").removeClass("hidden");
                     $("#max-color-size").removeClass("hidden");
                     $("#terminal-clique").removeClass("hidden");
-                    $("#max-deg-when-deleted span").text(maxDegWhenDeleted);
                     $("#no-of-colors span").text(noOfColor);
                     $("#max-color-size span").text(maxColorSize);
                     $("#terminal-clique span").text(terminalCliqueSize);

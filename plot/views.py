@@ -8,22 +8,45 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 import operator
+import copy
 import timeit
 import numpy as np
 import json
 
 
-def generate_xlsx(nodes, degree, min_deg, avg_deg):
-    variable = Counter(degree.values())
-    book = xlwt.Workbook()
-    sheet1 = book.add_sheet("Sheet1")
-    i = 0
-    for var in variable.iteritems():
-        sheet1.write(i, 0, var[0])
-        sheet1.write(i, 1, var[1])
+def generate_xlsx(color_graph, deg_when_deleted, nodes, avg_deg):
+    workbook = xlsxwriter.Workbook("data_" + str(nodes) + "_" + str(avg_deg) + ".xlsx")
 
-        i += 1
-    book.save("degree.xls")
+    worksheet1 = workbook.add_worksheet()
+    # worksheet2 = workbook.add_worksheet()
+
+    worksheet1.write(0, 0, "Nodes")
+    worksheet1.write(0, 1, "Time")
+    for i in range(len(deg_when_deleted)):
+        worksheet1.write(i + 1, 0, i + 1)
+        worksheet1.write(i + 1, 1, deg_when_deleted[i][0])
+        worksheet1.write(i + 1, 2, deg_when_deleted[i][1])
+        worksheet1.write(i + 1, 3, avg_deg)
+
+    # worksheet1.write(0, 0, "Nodes")
+    # worksheet1.write(0, 1, "Deg. when deleted")
+    # worksheet1.write(0, 2, "Original degree")
+    # worksheet1.write(0, 3, "Avg. degree")
+    # for i in range(len(deg_when_deleted)):
+    #     worksheet1.write(i+1, 0, i+1)
+    #     worksheet1.write(i+1, 1, deg_when_deleted[i][0])
+    #     worksheet1.write(i+1, 2, deg_when_deleted[i][1])
+    #     worksheet1.write(i+1, 3, avg_deg)
+
+    # i = 1
+    # worksheet2.write(0, 0, "Color")
+    # worksheet2.write(0, 1, "Nodes")
+    # for val in color_graph.values():
+    #     worksheet2.write(i, 0, i)
+    #     worksheet2.write(i, 1, val)
+    #     i += 1
+
+    workbook.close()
 
 
 def calculate_distance(item, comp, mapped_list, number_of_edges, point_map, radius):
@@ -221,90 +244,6 @@ def plot_graph(request):
     return render(request, 'plot.html', returned_details)
 
 
-def smallest_last_order(request):
-    degree = {}
-    temp_mapped_list = {}
-    mapped_list = {}
-    last_order = []
-    point_map = {}
-    color_graph = {}
-    returned_details = {}
-    terminal_clique_size = 0
-    deg_when_deleted = {}
-
-    if request.method == "POST":
-        mapped_list = json.loads(request.POST["mapped_list"])
-        point_map = json.loads(request.POST["point_map"])
-        temp_mapped_list = json.loads(request.POST["mapped_list"])
-
-    for k in temp_mapped_list.keys():
-        degree.setdefault(len(temp_mapped_list[k]) - 1, []).append(temp_mapped_list[k][0])
-
-    degree_map = {str(lst[0]): len(lst) - 1 for lst in temp_mapped_list.values()}
-
-    start = timeit.default_timer()
-
-    while degree_map:
-        min_deg = min(degree.iteritems(), key=operator.itemgetter(0))[0]
-        min_ver = degree[min_deg][0]
-
-        c_terminal = 0
-        for adj in temp_mapped_list[str(point_map[str(min_ver)])][1:]:
-            try:
-                adj_point = temp_mapped_list[str(adj)][0]
-                deg = degree_map[str(adj_point)]
-                degree_map[str(adj_point)] -= 1
-                degree.setdefault(deg - 1, []).append(adj_point)
-                degree[deg].remove(adj_point)
-                c_terminal += 1
-                temp_mapped_list[str(adj)].pop(temp_mapped_list[str(adj)].index(point_map[str(min_ver)]))
-                if len(degree[deg]) == 0:
-                    del degree[deg]
-            except KeyError:
-                pass
-            except ValueError:
-                pass
-
-        degree[min_deg].remove(min_ver)
-
-        deg_when_deleted[str(min_ver)] = min_deg
-
-        last_order.append(str(min_ver))
-
-        remaining_nodes = len(degree_map)
-        if remaining_nodes - 1 == c_terminal and terminal_clique_size == 0:
-            terminal_clique_size = remaining_nodes
-
-        if len(degree[min_deg]) == 0:
-            degree.pop(min_deg)
-        degree_map.pop(str(min_ver))
-
-    last_order_copy = last_order[:]
-    point_color, color = color_nodes(mapped_list, point_map, last_order_copy)
-
-    for c in point_color.keys():
-        color_graph.setdefault(str(point_color[c]), []).append(c)
-    color_graph = {k: len(color_graph[k]) for k in color_graph.keys()}
-
-    max_color = max(color_graph.iteritems(), key=operator.itemgetter(1))[1]
-
-    end = timeit.default_timer()
-    print "Time taken for color generation: " + str(end - start)
-
-    returned_details["point_color"] = json.dumps(point_color)
-    returned_details["last_order"] = last_order
-    returned_details["color_graph"] = json.dumps(color_graph)
-    returned_details["terminal_clique_size"] = terminal_clique_size
-    returned_details["no_of_colors"] = len(color)
-    returned_details["max_color_size"] = max_color
-    returned_details["max_deg_when_deleted"] = max_deg_when_deleted
-
-    return HttpResponse(
-        json.dumps(returned_details),
-        content_type='application/json'
-    )
-
-
 def color_nodes(mapped_list, point_map, last_order):
     point_color = {}
     color = []
@@ -338,3 +277,90 @@ def color_nodes(mapped_list, point_map, last_order):
         point_color[str(node)] = color[color_index]
 
     return point_color, color
+
+
+def smallest_last_order(request):
+    degree = {}
+    temp_mapped_list = {}
+    mapped_list = {}
+    point_map = {}
+    color_graph = {}
+    returned_details = {}
+    terminal_clique_size = 0
+    deg_when_deleted = []
+
+    if request.method == "POST":
+        mapped_list = json.loads(request.POST["mapped_list"])
+        point_map = json.loads(request.POST["point_map"])
+        temp_mapped_list = json.loads(request.POST["mapped_list"])
+
+    last_order = []
+    for k in temp_mapped_list.keys():
+        degree.setdefault(len(temp_mapped_list[k]) - 1, []).append(temp_mapped_list[k][0])
+
+    degree_map = {str(lst[0]): len(lst) - 1 for lst in temp_mapped_list.values()}
+    degree_map_ref = copy.deepcopy(degree_map)
+
+    start = timeit.default_timer()
+
+    while degree_map:
+        min_deg = min(degree.iteritems(), key=operator.itemgetter(0))[0]
+        min_ver = degree[min_deg][0]
+
+        c_terminal = 0
+        for adj in temp_mapped_list[str(point_map[str(min_ver)])][1:]:
+            try:
+                adj_point = temp_mapped_list[str(adj)][0]
+                deg = degree_map[str(adj_point)]
+                degree_map[str(adj_point)] -= 1
+                degree.setdefault(deg - 1, []).append(adj_point)
+                degree[deg].remove(adj_point)
+                c_terminal += 1
+                temp_mapped_list[str(adj)].pop(temp_mapped_list[str(adj)].index(point_map[str(min_ver)]))
+                if len(degree[deg]) == 0:
+                    del degree[deg]
+            except KeyError:
+                pass
+            except ValueError:
+                pass
+
+        degree[min_deg].remove(min_ver)
+
+        deg_when_deleted.append([min_deg, degree_map_ref[str(min_ver)]])
+
+        last_order.append(str(min_ver))
+
+        remaining_nodes = len(degree_map)
+        if remaining_nodes - 1 == c_terminal and terminal_clique_size == 0:
+            terminal_clique_size = remaining_nodes
+
+        if len(degree[min_deg]) == 0:
+            degree.pop(min_deg)
+        degree_map.pop(str(min_ver))
+
+    last_order_copy = last_order[:]
+    point_color, color = color_nodes(mapped_list, point_map, last_order_copy)
+
+    for c in point_color.keys():
+        color_graph.setdefault(color.index(point_color[c]), []).append(c)
+    color_graph = {k: len(color_graph[k]) for k in color_graph.keys()}
+
+    max_color = max(color_graph.iteritems(), key=operator.itemgetter(1))[1]
+
+    end = timeit.default_timer()
+    print "Time taken for color generation: " + str(end - start)
+
+    returned_details["point_color"] = json.dumps(point_color)
+    returned_details["last_order"] = last_order
+    returned_details["color_graph"] = json.dumps(color_graph)
+    returned_details["terminal_clique_size"] = terminal_clique_size
+    returned_details["no_of_colors"] = len(color)
+    returned_details["max_color_size"] = max_color
+
+    return HttpResponse(
+        json.dumps(returned_details),
+        content_type='application/json'
+    )
+
+
+

@@ -53,40 +53,6 @@
             }
         });
 
-        /*
-        function setup(){
-            createCanvas(600, 600, WEBGL);
-            background(0);
-
-            if(topology === "circle"){
-                p.background(180);
-                p.fill(0);
-                p.ellipse(p.width/2, p.width/2, p.height, p.height);
-            }
-
-            for (var key in mappedList) {
-                if (mappedList.hasOwnProperty(key)) {
-                    var val = mappedList[key];
-
-                    fill(255, 200, 0);
-                    noStroke();
-                    ellipsoid((val[0])[0] * offset, (val[0])[1] * offset, point_size, point_size);
-
-                    for (var i = 0; i < max_vertex.length; i++){
-                        if (val[0][0] === max_vertex[i][0] && val[0][1] === max_vertex[i][1]){
-                            max_ver.push(val);
-                        }
-                    }
-
-                    for (var i = 0; i < min_vertex.length; i++){
-                        if (val[0][0] === min_vertex[i][0] && val[0][1] === min_vertex[i][1]){
-                            min_ver.push(val);
-                        }
-                    }
-                }
-            }
-        }
-        */
         var c_back = function( p ) {
             p.setup = function() {
                 p.createCanvas(600, 600);
