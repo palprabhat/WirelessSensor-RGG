@@ -1,9 +1,6 @@
 # author: Prabhat Kumar Pal
 # SMU Id: 47499768
-from collections import Counter
 
-import xlwt
-import xlsxwriter
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -12,41 +9,6 @@ import copy
 import timeit
 import numpy as np
 import json
-
-
-def generate_xlsx(color_graph, deg_when_deleted, nodes, avg_deg):
-    workbook = xlsxwriter.Workbook("data_" + str(nodes) + "_" + str(avg_deg) + ".xlsx")
-
-    worksheet1 = workbook.add_worksheet()
-    # worksheet2 = workbook.add_worksheet()
-
-    worksheet1.write(0, 0, "Nodes")
-    worksheet1.write(0, 1, "Time")
-    for i in range(len(deg_when_deleted)):
-        worksheet1.write(i + 1, 0, i + 1)
-        worksheet1.write(i + 1, 1, deg_when_deleted[i][0])
-        worksheet1.write(i + 1, 2, deg_when_deleted[i][1])
-        worksheet1.write(i + 1, 3, avg_deg)
-
-    # worksheet1.write(0, 0, "Nodes")
-    # worksheet1.write(0, 1, "Deg. when deleted")
-    # worksheet1.write(0, 2, "Original degree")
-    # worksheet1.write(0, 3, "Avg. degree")
-    # for i in range(len(deg_when_deleted)):
-    #     worksheet1.write(i+1, 0, i+1)
-    #     worksheet1.write(i+1, 1, deg_when_deleted[i][0])
-    #     worksheet1.write(i+1, 2, deg_when_deleted[i][1])
-    #     worksheet1.write(i+1, 3, avg_deg)
-
-    # i = 1
-    # worksheet2.write(0, 0, "Color")
-    # worksheet2.write(0, 1, "Nodes")
-    # for val in color_graph.values():
-    #     worksheet2.write(i, 0, i)
-    #     worksheet2.write(i, 1, val)
-    #     i += 1
-
-    workbook.close()
 
 
 def calculate_distance(item, comp, mapped_list, number_of_edges, point_map, radius):
