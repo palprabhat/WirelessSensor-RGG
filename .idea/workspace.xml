@@ -389,7 +389,14 @@
       <option name="project" value="LOCAL" />
       <updated>1510075200220</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="smallest last order and coloring nodes + bugs fixed from prev push">
+      <created>1510075207636</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1510075207636</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="ToolWindowManager">
