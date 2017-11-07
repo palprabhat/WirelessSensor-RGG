@@ -11,9 +11,11 @@
     <div class="container">
         <div class="row">
             <div class="col-md-7">
-                <div id='myContainer1'></div>
-                <div id='myContainer2'></div>
-                <div id='myContainer3' style="display: none;"></div>
+                <div id='myContainer0' style="z-index: 0"></div>
+                <div id='myContainer1' style="z-index: 1"></div>
+                <div id='myContainer2' style="z-index: 3"></div>
+                <div id='myContainer3' style="z-index: 4"></div>
+                <div id='myContainer4' style="z-index: 3"></div>
             </div>
             <div class="col-md-5">
                 <div class="col-md-6">
@@ -33,10 +35,22 @@
                         <li class="list-group-item">
                             <div><label><strong>No. of Edges:</strong> {{ number_of_edges }}</label></div>
                         </li>
-                        <li class="list-group-item">
+                        <li class="list-group-item hidden" id="max-deg-when-deleted">
+                            <div><label><strong>Max Deg. when deleted:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden" id="no-of-colors">
+                            <div><label><strong>No. of Colors:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden" id="max-color-size">
+                            <div><label><strong>Max Color Size:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden" id="terminal-clique">
+                            <div><label><strong>Terminal Clique Size:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden">
                             <div><label><span class="color-red">&nbsp;&nbsp;&nbsp;&nbsp;</span> Max degree</label></div>
                         </li>
-                        <li class="list-group-item">
+                        <li class="list-group-item hidden">
                             <div><label><span class="color-blue">&nbsp;&nbsp;&nbsp;&nbsp;</span> Min degree</label></div>
                         </li>
                     </ul>
@@ -72,12 +86,17 @@
                         <div class="input-group full-width">
                             <button type="submit" class="btn btn-info btn-block">Plot Graph</button>
                         </div>
+                        <div class="inline-group full-width">
+                            <button type="button" id="smallestLastOrder" class="btn btn-info btn-block hidden">Generate Color Graph</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
+    <div class="loader-container">
+        <div class="loader"></div>
+    </div>
 	<script type="text/javascript" src="{% static 'js/jquery-1.11.1.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/p5.min.js' %}"></script>
 	<script>
@@ -86,7 +105,7 @@
         var min_vertex = {{ min_vertex }};
         var plot_option = {{ plot_option }};
         var topology = "{{ topology }}";
-        var json = JSON.parse('{{ mapped_list|safe }}');
+        var mappedList = JSON.parse('{{ mapped_list|safe }}');
         var offset = 600;
         {% if topology == "circle" %}
             offset = 300;
@@ -96,7 +115,83 @@
         var cellCount = {{ cell_count }};
         var pointMap = JSON.parse('{{ point_map|safe }}');
         var animate = {{ animate }};
+        var pointColor = [];
+        var lastOrder = [];
+        var colorGraph = [];
 	</script>
     <script type="text/javascript" src="{% static 'js/sketch.js' %}"></script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        var csrftoken = getCookie('csrftoken');
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        $('#smallestLastOrder').click(function() {
+            $('.loader-container').css("display", "block");
+            $.ajax({
+                url: "/algo",
+                method: 'POST',
+                data: {
+                    point_map: JSON.stringify(pointMap),
+                    mapped_list: JSON.stringify(mappedList)
+                },
+                success: function (json) {
+                    $('.loader-container').css("display", "none");
+
+                    document.getElementById("showEdgeCheck").checked = false;
+                    document.getElementById("minMaxCheck").checked = false;
+                    $("#myContainer1").css("display", "none");
+                    $("#myContainer2").css("display", "none");
+                    $("#myContainer3").css("display", "none");
+                    $(".color-red").parent().parent().parent().addClass("hidden");
+                    $(".color-blue").parent().parent().parent().addClass("hidden");
+
+                    $("#myContainer4").find("canvas").remove();
+
+                    pointColor = JSON.parse(json["point_color"]);
+                    lastOrder = json["last_order"];
+                    colorGraph = JSON.parse(json["color_graph"]);
+                    var noOfColor = json["no_of_colors"];
+                    var maxDegWhenDeleted = json["max_deg_when_deleted"];
+                    var maxColorSize = json["max_color_size"];
+                    var terminalCliqueSize = json["terminal_clique_size"];
+
+                    $("#max-deg-when-deleted").removeClass("hidden");
+                    $("#no-of-colors").removeClass("hidden");
+                    $("#max-color-size").removeClass("hidden");
+                    $("#terminal-clique").removeClass("hidden");
+                    $("#max-deg-when-deleted span").text(maxDegWhenDeleted);
+                    $("#no-of-colors span").text(noOfColor);
+                    $("#max-color-size span").text(maxColorSize);
+                    $("#terminal-clique span").text(terminalCliqueSize);
+
+                    drawColorNodes();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

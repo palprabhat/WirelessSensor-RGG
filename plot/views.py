@@ -1,11 +1,29 @@
 # author: Prabhat Kumar Pal
 # SMU Id: 47499768
+from collections import Counter
+
+import xlwt
+import xlsxwriter
+from django.http import HttpResponse
 from django.shortcuts import render
 
 import operator
 import timeit
 import numpy as np
 import json
+
+
+def generate_xlsx(nodes, degree, min_deg, avg_deg):
+    variable = Counter(degree.values())
+    book = xlwt.Workbook()
+    sheet1 = book.add_sheet("Sheet1")
+    i = 0
+    for var in variable.iteritems():
+        sheet1.write(i, 0, var[0])
+        sheet1.write(i, 1, var[1])
+
+        i += 1
+    book.save("degree.xls")
 
 
 def calculate_distance(item, comp, mapped_list, number_of_edges, point_map, radius):
@@ -26,8 +44,8 @@ def calculate_distance(item, comp, mapped_list, number_of_edges, point_map, radi
     return number_of_edges, mapped_list
 
 
-def get_max_and_min_degree(mapped_list, nodes, deg):
-    degree = {str(lst[0]): len(lst)-1 for lst in mapped_list.values()}
+def get_max_and_min_degree(mapped_list, nodes):
+    degree = {str(lst[0]): len(lst) - 1 for lst in mapped_list.values()}
     total_degree = sum(degree.values())
 
     avg_deg_received = float(total_degree) / nodes
@@ -39,9 +57,11 @@ def get_max_and_min_degree(mapped_list, nodes, deg):
     min_vertex = [k for k, v in degree.items() if v == min_deg]
 
     for i in range(0, len(max_vertex)):
-        max_vertex[i] = [float(max_vertex[i].replace('[', '').replace(']', '').split(', ')[0]), float(max_vertex[i].replace('[', '').replace(']', '').split(', ')[1])]
+        max_vertex[i] = [float(max_vertex[i].replace('[', '').replace(']', '').split(', ')[0]),
+                         float(max_vertex[i].replace('[', '').replace(']', '').split(', ')[1])]
     for i in range(0, len(min_vertex)):
-        min_vertex[i] = [float(min_vertex[i].replace('[', '').replace(']', '').split(', ')[0]), float(min_vertex[i].replace('[', '').replace(']', '').split(', ')[1])]
+        min_vertex[i] = [float(min_vertex[i].replace('[', '').replace(']', '').split(', ')[0]),
+                         float(min_vertex[i].replace('[', '').replace(']', '').split(', ')[1])]
 
     return min_deg, max_deg, avg_deg_received, max_vertex, min_vertex
 
@@ -122,7 +142,7 @@ def square_topology(request, nodes, avg_deg):
 
     number_of_edges, mapped_list = cell_traverse(no_of_col, cells, point_map, radius)
 
-    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes, avg_deg)
+    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes)
 
     return {'mapped_list': json.dumps(mapped_list), 'avg_deg_received': avg_deg_received, 'max_deg': max_deg,
             'min_deg': min_deg, 'number_of_edges': number_of_edges['0'], 'max_vertex': max_vertex,
@@ -148,7 +168,7 @@ def circle_topology(request, nodes, avg_deg):
 
     number_of_edges, mapped_list = cell_traverse(no_of_col, cells, point_map, radius)
 
-    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes, avg_deg)
+    min_deg, max_deg, avg_deg_received, max_vertex, min_vertex = get_max_and_min_degree(mapped_list, nodes)
 
     return {'mapped_list': json.dumps(mapped_list), 'avg_deg_received': avg_deg_received, 'max_deg': max_deg,
             'min_deg': min_deg, 'number_of_edges': number_of_edges['0'], 'max_vertex': max_vertex,
@@ -193,9 +213,128 @@ def plot_graph(request):
     returned_details["topology"] = topology
     returned_details["radius_estimated"] = radius_estimated
     returned_details["animate"] = animate
-
+    returned_details["point_color"] = []
 
     stop = timeit.default_timer()
     print("Time taken: " + str(stop - start))
 
     return render(request, 'plot.html', returned_details)
+
+
+def smallest_last_order(request):
+    degree = {}
+    temp_mapped_list = {}
+    mapped_list = {}
+    last_order = []
+    point_map = {}
+    color_graph = {}
+    returned_details = {}
+    terminal_clique_size = 0
+    deg_when_deleted = {}
+
+    if request.method == "POST":
+        mapped_list = json.loads(request.POST["mapped_list"])
+        point_map = json.loads(request.POST["point_map"])
+        temp_mapped_list = json.loads(request.POST["mapped_list"])
+
+    for k in temp_mapped_list.keys():
+        degree.setdefault(len(temp_mapped_list[k]) - 1, []).append(temp_mapped_list[k][0])
+
+    degree_map = {str(lst[0]): len(lst) - 1 for lst in temp_mapped_list.values()}
+
+    start = timeit.default_timer()
+
+    while degree_map:
+        min_deg = min(degree.iteritems(), key=operator.itemgetter(0))[0]
+        min_ver = degree[min_deg][0]
+
+        c_terminal = 0
+        for adj in temp_mapped_list[str(point_map[str(min_ver)])][1:]:
+            try:
+                adj_point = temp_mapped_list[str(adj)][0]
+                deg = degree_map[str(adj_point)]
+                degree_map[str(adj_point)] -= 1
+                degree.setdefault(deg - 1, []).append(adj_point)
+                degree[deg].remove(adj_point)
+                c_terminal += 1
+                temp_mapped_list[str(adj)].pop(temp_mapped_list[str(adj)].index(point_map[str(min_ver)]))
+                if len(degree[deg]) == 0:
+                    del degree[deg]
+            except KeyError:
+                pass
+            except ValueError:
+                pass
+
+        degree[min_deg].remove(min_ver)
+
+        deg_when_deleted[str(min_ver)] = min_deg
+
+        last_order.append(str(min_ver))
+
+        remaining_nodes = len(degree_map)
+        if remaining_nodes - 1 == c_terminal and terminal_clique_size == 0:
+            terminal_clique_size = remaining_nodes
+
+        if len(degree[min_deg]) == 0:
+            degree.pop(min_deg)
+        degree_map.pop(str(min_ver))
+
+    last_order_copy = last_order[:]
+    point_color, color = color_nodes(mapped_list, point_map, last_order_copy)
+
+    for c in point_color.keys():
+        color_graph.setdefault(str(point_color[c]), []).append(c)
+    color_graph = {k: len(color_graph[k]) for k in color_graph.keys()}
+
+    max_color = max(color_graph.iteritems(), key=operator.itemgetter(1))[1]
+
+    end = timeit.default_timer()
+    print "Time taken for color generation: " + str(end - start)
+
+    returned_details["point_color"] = json.dumps(point_color)
+    returned_details["last_order"] = last_order
+    returned_details["color_graph"] = json.dumps(color_graph)
+    returned_details["terminal_clique_size"] = terminal_clique_size
+    returned_details["no_of_colors"] = len(color)
+    returned_details["max_color_size"] = max_color
+    returned_details["max_deg_when_deleted"] = max_deg_when_deleted
+
+    return HttpResponse(
+        json.dumps(returned_details),
+        content_type='application/json'
+    )
+
+
+def color_nodes(mapped_list, point_map, last_order):
+    point_color = {}
+    color = []
+
+    def generate_color():
+        r = np.random.random_integers(10, 255)
+        g = np.random.random_integers(10, 255)
+        b = np.random.random_integers(10, 255)
+
+        return [r, g, b]
+
+    color.append(generate_color())
+
+    while last_order:
+        node = last_order.pop()
+        color_index = 0
+        temp_adj = []
+        for adj in mapped_list[str(point_map[str(node)])][1:]:
+            if str(mapped_list[str(adj)][0]) in point_color:
+                temp_adj.append(color.index(point_color[str(mapped_list[str(adj)][0])]))
+
+        if len(temp_adj) > 0:
+            temp_adj = sorted(set(temp_adj))
+            for i in temp_adj:
+                if color_index == i:
+                    color_index += 1
+
+        if color_index > len(color) - 1:
+            color.append(generate_color())
+
+        point_color[str(node)] = color[color_index]
+
+    return point_color, color

@@ -1,5 +1,7 @@
         var max_ver = [];
         var min_ver = [];
+        var startEdge = false;
+        var startDraw = false;
 
         document.getElementById("animate").checked = !!animate;
 
@@ -35,11 +37,22 @@
         function drawMinMax() {
             if (document.getElementById("minMaxCheck").checked){
                 $("#myContainer3").css("display", "block");
+                $(".color-red").parent().parent().parent().removeClass("hidden");
+                $(".color-blue").parent().parent().parent().removeClass("hidden");
             }
             else {
                 $("#myContainer3").css("display", "none");
+                $(".color-red").parent().parent().parent().addClass("hidden");
+                $(".color-blue").parent().parent().parent().addClass("hidden");
             }
         }
+
+        $(document).ready(function(){
+            if (nodes > 0){
+                $("#smallestLastOrder").removeClass("hidden");
+            }
+        });
+
         /*
         function setup(){
             createCanvas(600, 600, WEBGL);
@@ -51,9 +64,9 @@
                 p.ellipse(p.width/2, p.width/2, p.height, p.height);
             }
 
-            for (var key in json) {
-                if (json.hasOwnProperty(key)) {
-                    var val = json[key];
+            for (var key in mappedList) {
+                if (mappedList.hasOwnProperty(key)) {
+                    var val = mappedList[key];
 
                     fill(255, 200, 0);
                     noStroke();
@@ -74,28 +87,36 @@
             }
         }
         */
-
         var c_back = function( p ) {
-            var lowerBound = 0;
-
             p.setup = function() {
                 p.createCanvas(600, 600);
                 p.background(0);
                 p.frameRate(60);
 
-                if(topology === "circle"){
+                if (topology === "circle") {
                     p.background(180);
                     p.fill(0);
-                    p.ellipse(p.width/2, p.width/2, p.height, p.height);
+                    p.ellipse(p.width / 2, p.width / 2, p.height, p.height);
                 }
+            };
+        };
+        var canvasBackground = new p5(c_back, 'myContainer0');
+
+        var c_nodes = function( p ) {
+            var lowerBound = 0;
+
+            p.setup = function() {
+                p.createCanvas(600, 600);
+                p.background(0, 0, 0, 0);
+                p.frameRate(60);
 
                 p.fill(255, 200, 0);
                 p.noStroke();
 
                 if(!animate) {
-                    for (var key in json) {
-                        if (json.hasOwnProperty(key)) {
-                            var val = json[key];
+                    for (var key in mappedList) {
+                        if (mappedList.hasOwnProperty(key)) {
+                            var val = mappedList[key];
 
                             p.ellipse((val[0])[0] * offset, (val[0])[1] * offset, point_size, point_size);
 
@@ -105,13 +126,14 @@
                                 }
                             }
 
-                            for (var i = 0; i < min_vertex.length; i++) {
-                                if (val[0][0] === min_vertex[i][0] && val[0][1] === min_vertex[i][1]) {
+                            for (var j = 0; j < min_vertex.length; j++) {
+                                if (val[0][0] === min_vertex[j][0] && val[0][1] === min_vertex[j][1]) {
                                     min_ver.push(val);
                                 }
                             }
                         }
                     }
+                    startDraw = true;
                 }
             };
             p.draw = function () {
@@ -125,7 +147,12 @@
                                 xComp = (xComp < 0.0001) ? xComp.toExponential().toString().replace("-", "-0") : xComp;
                                 yComp = (yComp < 0.0001) ? yComp.toExponential().toString().replace("-", "-0") : yComp;
 
-                                var val = json[pointMap["[" + xComp + ", " + yComp + "]"]];
+                                var val = mappedList[pointMap["[" + xComp + ", " + yComp + "]"]];
+
+                                if (pointColor.length > 0){
+                                    p.fill(pointColor[val]);
+                                }
+
                                 p.ellipse((val[0])[0] * offset, (val[0])[1] * offset, point_size, point_size);
 
                                 for (var i = 0; i < max_vertex.length; i++) {
@@ -134,45 +161,49 @@
                                     }
                                 }
 
-                                for (var i = 0; i < min_vertex.length; i++) {
-                                    if (val[0][0] === min_vertex[i][0] && val[0][1] === min_vertex[i][1]) {
+                                for (var j = 0; j < min_vertex.length; j++) {
+                                    if (val[0][0] === min_vertex[j][0] && val[0][1] === min_vertex[j][1]) {
                                         min_ver.push(val);
                                     }
                                 }
                             }
                         }
                         lowerBound++;
+                        startEdge = true;
+                    }
+                    else{
+                        startDraw = true;
                     }
                 }
             };
         };
-        var canvasBackground = new p5(c_back, 'myContainer1');
+        var canvasNodes = new p5(c_nodes, 'myContainer1');
 
         var c_edges = function( p ) {
             var lowerBound = 0;
-            var c = 0;
             p.setup = function() {
                 p.createCanvas(600, 600);
                 p.background(0, 0, 0, 0);
+                p.frameRate(60);
 
                 p.stroke(255, 255, 255, 75);
                 p.strokeWeight(0.5);
 
                 if(!animate) {
-                    for (var key in json) {
-                        if (json.hasOwnProperty(key)) {
-                            var val = json[key];
+                    for (var key in mappedList) {
+                        if (mappedList.hasOwnProperty(key)) {
+                            var val = mappedList[key];
 
                             for (var i = 1; i < val.length; i++) {
                                 var v = val[i];
-                                p.line((val[0])[0] * offset, (val[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
+                                p.line((val[0])[0] * offset, (val[0])[1] * offset, (mappedList[v][0])[0] * offset, (mappedList[v][0])[1] * offset);
                             }
                         }
                     }
                 }
             };
             p.draw = function () {
-                if(animate) {
+                if(animate && startEdge) {
                     if (lowerBound < cellCount) {
                         var cell = lowerBound;
                         if (cells.hasOwnProperty(cell)) {
@@ -182,10 +213,10 @@
                                 xComp = (xComp < 0.0001) ? xComp.toExponential().toString().replace("-", "-0") : xComp;
                                 yComp = (yComp < 0.0001) ? yComp.toExponential().toString().replace("-", "-0") : yComp;
 
-                                var val = json[pointMap["[" + xComp + ", " + yComp + "]"]];
+                                var val = mappedList[pointMap["[" + xComp + ", " + yComp + "]"]];
                                 for (var i = 1; i < val.length; i++) {
                                     var v = val[i];
-                                    p.line((val[0])[0] * offset, (val[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
+                                    p.line((val[0])[0] * offset, (val[0])[1] * offset, (mappedList[v][0])[0] * offset, (mappedList[v][0])[1] * offset);
                                 }
                             }
                         }
@@ -212,7 +243,7 @@
                         for (var i = 1; i < element.length; i++) {
                             var v = element[i];
 
-                            p.line((element[0])[0] * offset, (element[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
+                            p.line((element[0])[0] * offset, (element[0])[1] * offset, (mappedList[v][0])[0] * offset, (mappedList[v][0])[1] * offset);
                             p.ellipse((element[0])[0] * offset, (element[0])[1] * offset, point_size, point_size);
                         }
                     });
@@ -227,14 +258,14 @@
                         }
                         for (var i = 1; i < element.length; i++) {
                             var v = element[i];
-                            p.line((element[0])[0] * offset, (element[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
+                            p.line((element[0])[0] * offset, (element[0])[1] * offset, (mappedList[v][0])[0] * offset, (mappedList[v][0])[1] * offset);
                             p.ellipse((element[0])[0] * offset, (element[0])[1] * offset, point_size, point_size);
                         }
                     });
                 }
             };
             p.draw = function () {
-                if(animate) {
+                if(animate && startDraw) {
                     if (drawFlagMin) {
                         p.fill(0, 0, 255, 255);
                         p.stroke(0, 0, 255, 100);
@@ -246,7 +277,7 @@
                             }
                             for (var i = 1; i < element.length; i++) {
                                 var v = element[i];
-                                p.line((element[0])[0] * offset, (element[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
+                                p.line((element[0])[0] * offset, (element[0])[1] * offset, (mappedList[v][0])[0] * offset, (mappedList[v][0])[1] * offset);
                                 p.ellipse((element[0])[0] * offset, (element[0])[1] * offset, point_size, point_size);
                             }
                             drawFlagMin = false;
@@ -260,7 +291,7 @@
                             for (var i = 1; i < element.length; i++) {
                                 var v = element[i];
 
-                                p.line((element[0])[0] * offset, (element[0])[1] * offset, (json[v][0])[0] * offset, (json[v][0])[1] * offset);
+                                p.line((element[0])[0] * offset, (element[0])[1] * offset, (mappedList[v][0])[0] * offset, (mappedList[v][0])[1] * offset);
                                 p.ellipse((element[0])[0] * offset, (element[0])[1] * offset, point_size, point_size);
                             }
                             drawFlagMax = false;
@@ -270,3 +301,43 @@
             };
         };
         var canvasMinMax = new p5(c_min_max, 'myContainer3');
+
+
+        var c_col_back = function( p ) {
+            var upperBound = lastOrder.length - 1;
+
+            p.setup = function() {
+                p.createCanvas(600, 600);
+                p.background(0, 0, 0, 0);
+                p.frameRate(60);
+
+                if(topology === "circle"){
+                    p.background(180);
+                    p.fill(0);
+                    p.ellipse(p.width/2, p.width/2, p.height, p.height);
+                }
+
+                p.fill(255, 200, 0);
+                p.noStroke();
+            };
+            p.draw = function () {
+                if (upperBound >= 0){
+                    for(var l = upperBound; l > upperBound - 10; l--) {
+                        var val = mappedList[pointMap[lastOrder[l]]];
+
+                        var xComp = val[0][0];
+                        var yComp = val[0][1];
+                        xComp = (xComp < 0.0001) ? xComp.toExponential().toString().replace("-", "-0") : xComp;
+                        yComp = (yComp < 0.0001) ? yComp.toExponential().toString().replace("-", "-0") : yComp;
+
+                        p.fill(pointColor["[" + xComp + ", " + yComp + "]"]);
+                        p.ellipse((val[0])[0] * offset, (val[0])[1] * offset, point_size, point_size);
+                    }
+                    upperBound -= 10;
+                }
+            }
+        };
+
+        function drawColorNodes() {
+            var colorNodes = new p5(c_col_back, 'myContainer4');
+        }
