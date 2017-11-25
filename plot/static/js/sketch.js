@@ -1,3 +1,4 @@
+        var backbone = [];
         var max_ver = [];
         var min_ver = [];
         var startEdge = false;
@@ -51,6 +52,17 @@
             if (nodes > 0){
                 $("#smallestLastOrder").removeClass("hidden");
             }
+
+            $('input[type=radio][name=backbone]').change(function() {
+                if (this.value == 1) {
+                    $("#myContainer5").css("display", "block");
+                    $("#myContainer6").css("display", "none");
+                }
+                else if (this.value == 2) {
+                    $("#myContainer5").css("display", "none");
+                    $("#myContainer6").css("display", "block");
+                }
+            });
         });
 
         var c_back = function( p ) {
@@ -269,7 +281,7 @@
         var canvasMinMax = new p5(c_min_max, 'myContainer3');
 
 
-        var c_col_back = function( p ) {
+        var c_col_back = function(p) {
             var upperBound = lastOrder.length - 1;
 
             p.setup = function() {
@@ -306,4 +318,50 @@
 
         function drawColorNodes() {
             var colorNodes = new p5(c_col_back, 'myContainer4');
+        }
+
+        var c_backbone = function(p) {
+            p.setup = function() {
+                p.createCanvas(600, 600);
+                p.background(0, 0, 0, 0);
+                p.frameRate(60);
+
+                if(topology === "circle"){
+                    p.background(180);
+                    p.fill(0);
+                    p.ellipse(p.width/2, p.width/2, p.height, p.height);
+                }
+
+                p.noStroke();
+                for (var key in backbone) {
+                    if (backbone.hasOwnProperty(key)) {
+                        var val = backbone[key];
+
+                        var keyComp = key.replace("[","").replace("]","").split(",");
+                        var xComp = keyComp[0];
+                        var yComp = keyComp[1];
+
+                        p.stroke(255, 255, 255, 75);
+                        p.strokeWeight(1);
+
+                        for (var i = 1; i < val.length; i++) {
+                            var v = val[i];
+                            p.line(xComp * offset, yComp * offset, v[0] * offset, v[1] * offset);
+                        }
+
+                        p.fill(backbone[key][0]);
+                        p.ellipse(xComp * offset, yComp * offset, point_size, point_size);
+                    }
+                }
+            };
+        };
+
+        function drawBackbone1() {
+            backbone = backbone1;
+            var bipartiteBackbone1 = new p5(c_backbone, 'myContainer5');
+        }
+
+        function drawBackbone2() {
+            backbone = backbone2;
+            var bipartiteBackbone2 = new p5(c_backbone, 'myContainer6');
         }

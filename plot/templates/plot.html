@@ -16,6 +16,8 @@
                 <div id='myContainer2' style="z-index: 3"></div>
                 <div id='myContainer3' style="z-index: 4"></div>
                 <div id='myContainer4' style="z-index: 3"></div>
+                <div id='myContainer5' style="z-index: 3"></div>
+                <div id='myContainer6' style="z-index: 3"></div>
             </div>
             <div class="col-md-5">
                 <div class="col-md-6">
@@ -41,8 +43,29 @@
                         <li class="list-group-item hidden" id="max-color-size">
                             <div><label><strong>Max Color Size:</strong> <span></span></label></div>
                         </li>
+                        <li class="list-group-item hidden" id="max-degree-deleted">
+                            <div><label><strong>Max Deg. when deleted:</strong> <span></span></label></div>
+                        </li>
                         <li class="list-group-item hidden" id="terminal-clique">
                             <div><label><strong>Terminal Clique Size:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden" id="backbone1-vertices">
+                            <div><label><strong>Backbone1 Vertices:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden" id="backbone1-edges">
+                            <div><label><strong>Backbone1 Edges:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden" id="backbone1-coverage">
+                            <div><label><strong>Backbone1 Coverage:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden" id="backbone2-vertices">
+                            <div><label><strong>Backbone2 Vertices:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden" id="backbone2-edges">
+                            <div><label><strong>Backbone2 Edges:</strong> <span></span></label></div>
+                        </li>
+                        <li class="list-group-item hidden" id="backbone2-coverage">
+                            <div><label><strong>Backbone2 Coverage:</strong> <span></span></label></div>
                         </li>
                         <li class="list-group-item hidden">
                             <div><label><span class="color-red">&nbsp;&nbsp;&nbsp;&nbsp;</span> Max degree</label></div>
@@ -65,7 +88,7 @@
                             <label class="form-control"><input type="checkbox" id="minMaxCheck" name="plot-option[]" value="1" onchange="drawMinMax()">&nbsp;&nbsp;Show Min-Max Deg.</label>
                         </div>
                         <div class="input-group full-width">
-                             <span class="input-group-addon">Topology</span>
+                            <span class="input-group-addon">Topology</span>
                             <select name="topology" id="topology" class="form-control" title="Topology">
                                 <option value="square">Unit Square</option>
                                 <option value="circle">Unit Circle</option>
@@ -85,6 +108,13 @@
                         </div>
                         <div class="inline-group full-width">
                             <button type="button" id="smallestLastOrder" class="btn btn-info btn-block hidden">Generate Color Graph</button>
+                        </div>
+                        <div class="inline-group full-width">
+                            <button type="button" id="bipartiteBackbone" class="btn btn-info btn-block hidden">Bipartite Backbone</button>
+                        </div>
+                        <div class="rad_backbone inline-group full-width hidden">
+                            <label class="form-control"><input type="radio" id="backbone1" name="backbone" value="1" checked>&nbsp;&nbsp;Backbone1</label>
+                            <label class="form-control"><input type="radio" id="backbone2" name="backbone" value="2">&nbsp;&nbsp;Backbone2</label>
                         </div>
                     </form>
                 </div>
@@ -115,6 +145,10 @@
         var pointColor = [];
         var lastOrder = [];
         var colorGraph = [];
+        var pointColorList = [];
+        var colorList = [];
+        var backbone1 = [];
+        var backbone2 = [];
 	</script>
     <script type="text/javascript" src="{% static 'js/sketch.js' %}"></script>
     <script>
@@ -160,30 +194,72 @@
 
                     document.getElementById("showEdgeCheck").checked = false;
                     document.getElementById("minMaxCheck").checked = false;
-                    $("#myContainer1").css("display", "none");
-                    $("#myContainer2").css("display", "none");
-                    $("#myContainer3").css("display", "none");
-                    $(".color-red").parent().parent().parent().addClass("hidden");
-                    $(".color-blue").parent().parent().parent().addClass("hidden");
+                    $("#myContainer1, #myContainer2, #myContainer3, #myContainer5, #myContainer6").css("display", "none");
+                    $("#myContainer4").css("display", "block");
+                    $(".color-red, .color-blue").parent().parent().parent().addClass("hidden");
+                    $(".rad_backbone, #backbone1-vertices, #backbone1-edges, #backbone1-coverage, #backbone2-vertices, #backbone2-edges, #backbone2-coverage").addClass("hidden");
 
                     $("#myContainer4").find("canvas").remove();
 
                     pointColor = JSON.parse(json["point_color"]);
                     lastOrder = json["last_order"];
                     colorGraph = JSON.parse(json["color_graph"]);
-                    var noOfColor = json["no_of_colors"];
-                    var maxColorSize = json["max_color_size"];
-                    var terminalCliqueSize = json["terminal_clique_size"];
+                    pointColorList = JSON.parse(json["point_color_list"]);
+                    colorList = json["color_list"];
 
-                    $("#max-deg-when-deleted").removeClass("hidden");
-                    $("#no-of-colors").removeClass("hidden");
-                    $("#max-color-size").removeClass("hidden");
-                    $("#terminal-clique").removeClass("hidden");
-                    $("#no-of-colors span").text(noOfColor);
-                    $("#max-color-size span").text(maxColorSize);
-                    $("#terminal-clique span").text(terminalCliqueSize);
+                    $("#max-deg-when-deleted, #no-of-colors, #max-color-size, #max-degree-deleted, #terminal-clique").removeClass("hidden");
+                    $("#no-of-colors span").text(json["no_of_colors"]);
+                    $("#max-color-size span").text(json["max_color_size"]);
+                    $("#max-degree-deleted span").text(json["max_deg_when_deleted"]);
+                    $("#terminal-clique span").text(json["terminal_clique_size"]);
 
                     drawColorNodes();
+                    $("#bipartiteBackbone").removeClass("hidden");
+                    document.getElementById("backbone1").checked = true;
+                    document.getElementById("backbone2").checked = false;
+                    $("#myContainer2").css("opacity", "1");
+                    $("#minMaxCheck").removeAttr("disabled");
+                }
+            });
+        });
+
+        $('#bipartiteBackbone').click(function() {
+            $('.loader-container').css("display", "block");
+            $.ajax({
+                url: "/bipartite",
+                method: 'POST',
+                data: {
+                    point_map: JSON.stringify(pointMap),
+                    mapped_list: JSON.stringify(mappedList),
+                    point_color_list: JSON.stringify(pointColorList),
+                    color: JSON.stringify(colorList),
+                    color_graph: JSON.stringify(colorGraph),
+                    nodes: nodes
+                },
+                success: function (json) {
+                    $('.loader-container').css("display", "none");
+
+                    $("#myContainer1, #myContainer2, #myContainer3, #myContainer4, #myContainer6").css("display", "none");
+                    $("#myContainer5").css("display", "block");
+                    $("#myContainer5, #myContainer6").find("canvas").remove();
+                    $(".rad_backbone, #backbone1-vertices, #backbone1-edges, #backbone1-coverage, #backbone2-vertices, #backbone2-edges, #backbone2-coverage").removeClass("hidden");
+                    document.getElementById("backbone1").checked = true;
+                    document.getElementById("backbone2").checked = false;
+                    $("#myContainer2").css("opacity", "0.3");
+                    $("#minMaxCheck").attr("disabled", true);
+
+                    $("#backbone1-vertices span").text(json["backbone1_vertices"]);
+                    $("#backbone1-edges span").text(json["backbone1_edges"]);
+                    $("#backbone1-coverage span").text(json["backbone1_coverage"] + "%");
+                    $("#backbone2-vertices span").text(json["backbone2_vertices"]);
+                    $("#backbone2-edges span").text(json["backbone2_edges"]);
+                    $("#backbone2-coverage span").text(json["backbone2_coverage"] + "%");
+
+                    backbone1 = JSON.parse(json["backbone1"]);
+                    backbone2 = JSON.parse(json["backbone2"]);
+
+                    drawBackbone1();
+                    drawBackbone2();
                 }
             });
         });

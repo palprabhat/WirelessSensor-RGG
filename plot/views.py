@@ -246,22 +246,21 @@ def smallest_last_order(request):
     temp_mapped_list = {}
     mapped_list = {}
     point_map = {}
-    color_graph = {}
+    point_color_list = {}
     returned_details = {}
     terminal_clique_size = 0
     deg_when_deleted = []
+    last_order = []
 
     if request.method == "POST":
         mapped_list = json.loads(request.POST["mapped_list"])
         point_map = json.loads(request.POST["point_map"])
         temp_mapped_list = json.loads(request.POST["mapped_list"])
 
-    last_order = []
     for k in temp_mapped_list.keys():
         degree.setdefault(len(temp_mapped_list[k]) - 1, []).append(temp_mapped_list[k][0])
 
     degree_map = {str(lst[0]): len(lst) - 1 for lst in temp_mapped_list.values()}
-    degree_map_ref = copy.deepcopy(degree_map)
 
     start = timeit.default_timer()
 
@@ -288,7 +287,7 @@ def smallest_last_order(request):
 
         degree[min_deg].remove(min_ver)
 
-        deg_when_deleted.append([min_deg, degree_map_ref[str(min_ver)]])
+        deg_when_deleted.append(min_deg)
 
         last_order.append(str(min_ver))
 
@@ -301,11 +300,14 @@ def smallest_last_order(request):
         degree_map.pop(str(min_ver))
 
     last_order_copy = last_order[:]
+
+    max_deg_when_deleted = max(deg_when_deleted)
+
     point_color, color = color_nodes(mapped_list, point_map, last_order_copy)
 
     for c in point_color.keys():
-        color_graph.setdefault(color.index(point_color[c]), []).append(c)
-    color_graph = {k: len(color_graph[k]) for k in color_graph.keys()}
+        point_color_list.setdefault(color.index(point_color[c]), []).append(c)
+    color_graph = {k: len(point_color_list[k]) for k in point_color_list.keys()}
 
     max_color = max(color_graph.iteritems(), key=operator.itemgetter(1))[1]
 
@@ -314,7 +316,10 @@ def smallest_last_order(request):
 
     returned_details["point_color"] = json.dumps(point_color)
     returned_details["last_order"] = last_order
+    returned_details["point_color_list"] = json.dumps(point_color_list)
     returned_details["color_graph"] = json.dumps(color_graph)
+    returned_details["color_list"] = color
+    returned_details["max_deg_when_deleted"] = max_deg_when_deleted
     returned_details["terminal_clique_size"] = terminal_clique_size
     returned_details["no_of_colors"] = len(color)
     returned_details["max_color_size"] = max_color
@@ -325,4 +330,98 @@ def smallest_last_order(request):
     )
 
 
+def connected_components(neighbors):
+    seen = set()
 
+    def component(n):
+        nodes = {n}
+        while nodes:
+            n = nodes.pop()
+            seen.add(n)
+            nodes |= neighbors[n] - seen
+            yield n
+    for node in neighbors:
+        if node not in seen:
+            yield component(node)
+
+
+def get_bipartite_backbone(request):
+    mapped_list = {}
+    point_map = {}
+    point_color_list = {}
+    returned_details = {}
+    color = []
+    color_graph = {}
+    backbone_list = []
+    nodes = 0
+
+    def construct_bipartite(c1, c2):
+        bipartite = {str(k): [color[int(top_four_color[c1])]] for k in point_color_list[str(top_four_color[c1])]}
+        bipartite.update(
+            {str(k): [color[int(top_four_color[c2])]] for k in point_color_list[str(top_four_color[c2])]})
+
+        for key in bipartite:
+            for element in mapped_list[str(point_map[key])][1:]:
+                if str(mapped_list[str(element)][0]) in bipartite:
+                    bipartite[key].append(mapped_list[str(element)][0])
+
+        new_graph = {node: set(str(edge) for edge in edges[1:]) for node, edges in bipartite.items()}
+        components = []
+        for component in connected_components(new_graph):
+            c = set(component)
+            components.append({key: bipartite[key] for key in c})
+
+        max_component = max({components.index(comp): len(comp) for comp in components}.iteritems(), key=operator.itemgetter(1))[0]
+        return copy.deepcopy(components[max_component])
+
+    if request.method == "POST":
+        mapped_list = json.loads(request.POST["mapped_list"])
+        point_map = json.loads(request.POST["point_map"])
+        point_color_list = json.loads(request.POST["point_color_list"])
+        color = json.loads(request.POST["color"])
+        color_graph = json.loads(request.POST["color_graph"])
+        nodes = request.POST["nodes"]
+
+    top_four_color = sorted(color_graph, key=color_graph.get, reverse=True)[:4]
+
+    for i in range(0, 4):
+        for j in range(i + 1, 4):
+            backbone_list.append(construct_bipartite(i, j))
+
+    backbone_edge_count = {}
+    for bi in range(0, 6):
+        s = 0
+        for k in backbone_list[bi]:
+            s += len(mapped_list[str(point_map[k])]) - 1
+        backbone_edge_count[bi] = s
+
+    backbone_index = sorted(backbone_edge_count, key=backbone_edge_count.get, reverse=True)[:2]
+    domination = []
+    for index in range(0, 2):
+        edges = set()
+        for key in backbone_list[backbone_index[index]]:
+            for edge in mapped_list[str(point_map[key])][1:]:
+                edges.add(edge)
+                edges.add(point_map[key])
+
+        domination.append(format((len(edges) / float(nodes)) * 100, '.2f'))
+
+    backbone1_edges = sum([len(lst) - 1 for lst in backbone_list[backbone_index[0]].values()]) / 2
+    backbone2_edges = sum([len(lst) - 1 for lst in backbone_list[backbone_index[1]].values()]) / 2
+
+    backbone1_vertices = len(backbone_list[backbone_index[0]].keys())
+    backbone2_vertices = len(backbone_list[backbone_index[1]].keys())
+
+    returned_details["backbone1"] = json.dumps(backbone_list[backbone_index[0]])
+    returned_details["backbone2"] = json.dumps(backbone_list[backbone_index[1]])
+    returned_details["backbone1_edges"] = backbone1_edges
+    returned_details["backbone2_edges"] = backbone2_edges
+    returned_details["backbone1_vertices"] = backbone1_vertices
+    returned_details["backbone2_vertices"] = backbone2_vertices
+    returned_details["backbone1_coverage"] = domination[0]
+    returned_details["backbone2_coverage"] = domination[1]
+
+    return HttpResponse(
+        json.dumps(returned_details),
+        content_type='application/json'
+    )

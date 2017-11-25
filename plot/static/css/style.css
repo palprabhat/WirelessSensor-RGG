@@ -14,10 +14,14 @@ body {
     padding: 0px;
     width: 75px;
 }
+.list-group-item{
+    padding: 5px 15px;
+}
 label{
     font-weight: normal;
+    margin-bottom: 0px;
 }
-#myContainer1, #myContainer2, #myContainer3, #myContainer4{
+#myContainer1, #myContainer2, #myContainer3, #myContainer4, #myContainer5, #myContainer6{
     position: absolute;
     top: 0;
 }
