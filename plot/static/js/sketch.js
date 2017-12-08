@@ -289,12 +289,6 @@
                 p.background(0, 0, 0, 0);
                 p.frameRate(60);
 
-                if(topology === "circle"){
-                    p.background(180);
-                    p.fill(0);
-                    p.ellipse(p.width/2, p.width/2, p.height, p.height);
-                }
-
                 p.fill(255, 200, 0);
                 p.noStroke();
             };

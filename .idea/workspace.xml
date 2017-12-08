@@ -3,10 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6d36f83f-4a27-4052-a161-ee8c97ba2fd8" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plot/static/css/style.css" afterPath="$PROJECT_DIR$/plot/static/css/style.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plot/static/js/sketch.js" afterPath="$PROJECT_DIR$/plot/static/js/sketch.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plot/templates/plot.html" afterPath="$PROJECT_DIR$/plot/templates/plot.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plot/urls.py" afterPath="$PROJECT_DIR$/plot/urls.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plot/views.py" afterPath="$PROJECT_DIR$/plot/views.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -26,11 +23,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="plot.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="plot.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/plot/templates/plot.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1717">
-              <caret line="221" column="17" lean-forward="true" selection-start-line="221" selection-start-column="17" selection-end-line="221" selection-end-column="17" />
+            <state relative-caret-position="3587">
+              <caret line="211" column="37" lean-forward="false" selection-start-line="211" selection-start-column="37" selection-end-line="211" selection-end-column="37" />
               <folding />
             </state>
           </provider>
@@ -39,8 +36,8 @@
       <file leaf-file-name="style.css" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plot/static/css/style.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="29" column="10" lean-forward="true" selection-start-line="29" selection-start-column="10" selection-end-line="29" selection-end-column="10" />
+            <state relative-caret-position="493">
+              <caret line="29" column="10" lean-forward="false" selection-start-line="29" selection-start-column="10" selection-end-line="29" selection-end-column="10" />
               <folding />
             </state>
           </provider>
@@ -49,23 +46,23 @@
       <file leaf-file-name="sketch.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plot/static/js/sketch.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="18" column="48" lean-forward="false" selection-start-line="18" selection-start-column="37" selection-end-line="18" selection-end-column="48" />
+            <state relative-caret-position="17">
+              <caret line="2" column="25" lean-forward="false" selection-start-line="2" selection-start-column="25" selection-end-line="2" selection-end-column="25" />
               <folding>
-                <marker date="1511578542999" expanded="true" signature="3200:4118" ph="//..." />
-                <marker date="1511578542999" expanded="true" signature="4351:5910" ph="{...}" />
-                <marker date="1511578542999" expanded="true" signature="6563:7051" ph="//..." />
-                <marker date="1511578542999" expanded="true" signature="8702:10062" ph="//..." />
+                <marker date="1512602281636" expanded="true" signature="3200:4118" ph="//..." />
+                <marker date="1512602281636" expanded="true" signature="4351:5910" ph="{...}" />
+                <marker date="1512602281636" expanded="true" signature="6563:7051" ph="//..." />
+                <marker date="1512602281636" expanded="true" signature="8702:10062" ph="//..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plot/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1884">
-              <caret line="420" column="22" lean-forward="true" selection-start-line="420" selection-start-column="22" selection-end-line="420" selection-end-column="40" />
+            <state relative-caret-position="7106">
+              <caret line="418" column="28" lean-forward="false" selection-start-line="418" selection-start-column="23" selection-end-line="418" selection-end-column="28" />
               <folding>
                 <element signature="e#48#84#0" expanded="true" />
               </folding>
@@ -87,13 +84,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>,</find>
-      <find>.?:</find>
-      <find>.*:</find>
-      <find>calculate_distance</find>
-      <find>cell_traverse</find>
-      <find>showEdgeCheck</find>
-      <find>time</find>
       <find>xy</find>
       <find>0000</find>
       <find>-</find>
@@ -117,6 +107,13 @@
       <find>node</find>
       <find>mappedList</find>
       <find>var key in</find>
+      <find>color</find>
+      <find>color_graph</find>
+      <find>colorGraph</find>
+      <find>point_color_list</find>
+      <find>connected_components</find>
+      <find>pointColorList</find>
+      <find>edges</find>
     </findStrings>
     <replaceStrings>
       <replace>600</replace>
@@ -146,9 +143,9 @@
         <option value="$PROJECT_DIR$/plot/static/js/node.js" />
         <option value="$PROJECT_DIR$/plot/urls.py" />
         <option value="$PROJECT_DIR$/plot/static/css/style.css" />
-        <option value="$PROJECT_DIR$/plot/views.py" />
-        <option value="$PROJECT_DIR$/plot/static/js/sketch.js" />
         <option value="$PROJECT_DIR$/plot/templates/plot.html" />
+        <option value="$PROJECT_DIR$/plot/static/js/sketch.js" />
+        <option value="$PROJECT_DIR$/plot/views.py" />
       </list>
     </option>
   </component>
@@ -180,7 +177,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -229,6 +225,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -418,7 +415,14 @@
       <option name="project" value="LOCAL" />
       <updated>1510075215734</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="bipartite backbone construction">
+      <created>1511579169275</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1511579169275</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -429,13 +433,13 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22468354" sideWeight="0.5146413" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22468354" sideWeight="0.48535872" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32911393" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22468354" sideWeight="0.48535872" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32911393" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36392406" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.36392406" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -466,19 +470,17 @@
     <MESSAGE value="bugs fixed, performance improved" />
     <MESSAGE value="added animation, bugs fixed, performance improved" />
     <MESSAGE value="smallest last order and coloring nodes + bugs fixed from prev push" />
-    <option name="LAST_COMMIT_MESSAGE" value="smallest last order and coloring nodes + bugs fixed from prev push" />
+    <MESSAGE value="bipartite backbone construction" />
+    <option name="LAST_COMMIT_MESSAGE" value="bipartite backbone construction" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="185" />
+      <option name="time" value="222" />
     </breakpoint-manager>
     <watches-manager>
-      <configuration name="Python.DjangoServer">
-        <watch expression="components" />
-      </configuration>
       <configuration name="PythonConfigurationType">
         <watch expression="arr[0:10] " />
       </configuration>
@@ -743,7 +745,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="311">
           <caret line="122" column="36" lean-forward="false" selection-start-line="122" selection-start-column="36" selection-end-line="122" selection-end-column="36" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -751,13 +752,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-762174762/__builtin__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="104">
-          <caret line="3360" column="8" lean-forward="false" selection-start-line="3360" selection-start-column="8" selection-end-line="3360" selection-end-column="8" />
         </state>
       </provider>
     </entry>
@@ -789,58 +783,63 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plot/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/Python27/Lib/site-packages/django/core/handlers/base.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="118">
           <caret line="184" column="0" lean-forward="false" selection-start-line="184" selection-start-column="0" selection-end-line="184" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plot/static/js/sketch.js">
+    <entry file="file://$USER_HOME$/.PyCharm2017.2/system/python_stubs/-762174762/__builtin__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="18" column="48" lean-forward="false" selection-start-line="18" selection-start-column="37" selection-end-line="18" selection-end-column="48" />
-          <folding>
-            <marker date="1511578542999" expanded="true" signature="3200:4118" ph="//..." />
-            <marker date="1511578542999" expanded="true" signature="4351:5910" ph="{...}" />
-            <marker date="1511578542999" expanded="true" signature="6563:7051" ph="//..." />
-            <marker date="1511578542999" expanded="true" signature="8702:10062" ph="//..." />
-          </folding>
+        <state relative-caret-position="155">
+          <caret line="527" column="4" lean-forward="false" selection-start-line="527" selection-start-column="4" selection-end-line="527" selection-end-column="4" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plot/templates/plot.html">
+    <entry file="file://$PROJECT_DIR$/plot/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1717">
-          <caret line="221" column="17" lean-forward="true" selection-start-line="221" selection-start-column="17" selection-end-line="221" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plot/static/css/style.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="29" column="10" lean-forward="true" selection-start-line="29" selection-start-column="10" selection-end-line="29" selection-end-column="10" />
-          <folding />
+        <state relative-caret-position="34">
+          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/plot/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1884">
-          <caret line="420" column="22" lean-forward="true" selection-start-line="420" selection-start-column="22" selection-end-line="420" selection-end-column="40" />
+        <state relative-caret-position="7106">
+          <caret line="418" column="28" lean-forward="false" selection-start-line="418" selection-start-column="23" selection-end-line="418" selection-end-column="28" />
           <folding>
             <element signature="e#48#84#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plot/static/js/sketch.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="2" column="25" lean-forward="false" selection-start-line="2" selection-start-column="25" selection-end-line="2" selection-end-column="25" />
+          <folding>
+            <marker date="1512602281636" expanded="true" signature="3200:4118" ph="//..." />
+            <marker date="1512602281636" expanded="true" signature="4351:5910" ph="{...}" />
+            <marker date="1512602281636" expanded="true" signature="6563:7051" ph="//..." />
+            <marker date="1512602281636" expanded="true" signature="8702:10062" ph="//..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plot/static/css/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="29" column="10" lean-forward="false" selection-start-line="29" selection-start-column="10" selection-end-line="29" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plot/templates/plot.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3587">
+          <caret line="211" column="37" lean-forward="false" selection-start-line="211" selection-start-column="37" selection-end-line="211" selection-end-column="37" />
+          <folding />
         </state>
       </provider>
     </entry>

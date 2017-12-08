@@ -354,6 +354,8 @@ def get_bipartite_backbone(request):
     color_graph = {}
     backbone_list = []
     nodes = 0
+    edges_list = []
+    domination = []
 
     def construct_bipartite(c1, c2):
         bipartite = {str(k): [color[int(top_four_color[c1])]] for k in point_color_list[str(top_four_color[c1])]}
@@ -372,7 +374,33 @@ def get_bipartite_backbone(request):
             components.append({key: bipartite[key] for key in c})
 
         max_component = max({components.index(comp): len(comp) for comp in components}.iteritems(), key=operator.itemgetter(1))[0]
-        return copy.deepcopy(components[max_component])
+
+        bipartite_comp = components[max_component]
+        bipartite_comp_temp = copy.deepcopy(bipartite_comp)
+
+        while True:
+            flag = True
+            for node in bipartite_comp_temp:
+                try:
+                    if len(bipartite_comp[node]) - 1 < 2:
+                        p = node.replace("[", "").replace("]", "").split(", ")
+                        bipartite_comp[str(bipartite_comp[node][1:][0])].remove([float(p[0]), float(p[1])])
+                        bipartite_comp.pop(node)
+                        flag = False
+                except KeyError:
+                    pass
+                except ValueError:
+                    pass
+            if flag:
+                break
+
+        edges = set()
+        for key in bipartite_comp:
+            for edge in mapped_list[str(point_map[key])][1:]:
+                edges.add(edge)
+                edges.add(point_map[key])
+
+        return copy.deepcopy(bipartite_comp), edges
 
     if request.method == "POST":
         mapped_list = json.loads(request.POST["mapped_list"])
@@ -382,35 +410,34 @@ def get_bipartite_backbone(request):
         color_graph = json.loads(request.POST["color_graph"])
         nodes = request.POST["nodes"]
 
+    start = timeit.default_timer()
+
     top_four_color = sorted(color_graph, key=color_graph.get, reverse=True)[:4]
 
     for i in range(0, 4):
         for j in range(i + 1, 4):
-            backbone_list.append(construct_bipartite(i, j))
+            bipartite, edges = construct_bipartite(i, j)
+            backbone_list.append(bipartite)
+            edges_list.append(edges)
 
     backbone_edge_count = {}
-    for bi in range(0, 6):
-        s = 0
-        for k in backbone_list[bi]:
-            s += len(mapped_list[str(point_map[k])]) - 1
-        backbone_edge_count[bi] = s
+    for e in range(0, 6):
+        s = len(edges_list[e])
+        backbone_edge_count[e] = s
 
     backbone_index = sorted(backbone_edge_count, key=backbone_edge_count.get, reverse=True)[:2]
-    domination = []
-    for index in range(0, 2):
-        edges = set()
-        for key in backbone_list[backbone_index[index]]:
-            for edge in mapped_list[str(point_map[key])][1:]:
-                edges.add(edge)
-                edges.add(point_map[key])
 
-        domination.append(format((len(edges) / float(nodes)) * 100, '.2f'))
+    for index in range(0, 2):
+        domination.append(format((backbone_edge_count[backbone_index[index]] / float(nodes)) * 100, '.2f'))
 
     backbone1_edges = sum([len(lst) - 1 for lst in backbone_list[backbone_index[0]].values()]) / 2
     backbone2_edges = sum([len(lst) - 1 for lst in backbone_list[backbone_index[1]].values()]) / 2
 
     backbone1_vertices = len(backbone_list[backbone_index[0]].keys())
     backbone2_vertices = len(backbone_list[backbone_index[1]].keys())
+
+    end = timeit.default_timer()
+    print "Time taken for backbone generation: " + str(end - start)
 
     returned_details["backbone1"] = json.dumps(backbone_list[backbone_index[0]])
     returned_details["backbone2"] = json.dumps(backbone_list[backbone_index[1]])
